@@ -5,6 +5,7 @@ from fastapi import APIRouter, Depends, HTTPException
 from api.models.entry import Entry, EntryCreate
 from api.repositories.postgres_repository import PostgresDB
 from api.services.entry_service import EntryService
+from api.services.llm_service import analyze_journal_entry
 
 router = APIRouter()
 
@@ -48,6 +49,7 @@ async def get_entry(entry_id: str, entry_service: EntryService = Depends(get_ent
     result = await entry_service.get_entry(entry_id)
     if not result:
         raise HTTPException(status_code=404, detail="Entry not found")
+
     return result
 
 
@@ -55,7 +57,6 @@ async def get_entry(entry_id: str, entry_service: EntryService = Depends(get_ent
 async def update_entry(
     entry_id: str, entry_update: dict, entry_service: EntryService = Depends(get_entry_service)
 ):
-    """Update a journal entry"""
     result = await entry_service.update_entry(entry_id, entry_update)
     if not result:
         raise HTTPException(status_code=404, detail="Entry not found")
@@ -65,64 +66,37 @@ async def update_entry(
 
 @router.delete("/entries/{entry_id}")
 async def delete_entry(entry_id: str, entry_service: EntryService = Depends(get_entry_service)):
-    """
-    TODO: Implement this endpoint to delete a specific journal entry
+    result = await entry_service.get_entry(entry_id)
+    if not result:
+        raise HTTPException(status_code=404, detail="Entry not found")
 
-    Steps to implement:
-    1. Use entry_service.get_entry(entry_id) to check if entry exists
-    2. If entry is None, raise HTTPException with status_code=404
-    3. Use entry_service.delete_entry(entry_id) to delete the entry
-    4. Return a success response (status 200)
-
-    Example response (status 200):
-    {"detail": "Entry deleted successfully"}
-
-    Hint: Look at how the update_entry endpoint checks for existence
-    """
-    raise HTTPException(status_code=501, detail="Not implemented - complete this endpoint!")
+    await entry_service.delete_entry(entry_id)
+    return {"detail": "Entry deleted successfully"}
 
 
 @router.delete("/entries")
 async def delete_all_entries(entry_service: EntryService = Depends(get_entry_service)):
-    """Delete all journal entries"""
     await entry_service.delete_all_entries()
     return {"detail": "All entries deleted"}
 
 
 @router.post("/entries/{entry_id}/analyze")
 async def analyze_entry(entry_id: str, entry_service: EntryService = Depends(get_entry_service)):
-    """
-    Analyze a journal entry using AI.
 
-    Returns sentiment, summary, key topics, entry_id, and created_at timestamp.
+    result = await entry_service.get_entry(entry_id)
+    if not result:
+        raise HTTPException(status_code=404, detail="Entry not found")
 
-    Response format:
-    {
-        "entry_id": "string",
-        "sentiment": "positive | negative | neutral",
-        "summary": "2 sentence summary of the entry",
-        "topics": ["topic1", "topic2", "topic3"],
-        "created_at": "timestamp"
-    }
-
-    TODO: Implement this endpoint. Steps:
-    1. Fetch the entry from database using entry_service.get_entry(entry_id)
-    2. Return 404 if entry not found
-    3. Combine work + struggle + intention into text
-    4. Call llm_service.analyze_journal_entry(entry_id, entry_text)
-    5. Return the analysis result
-    6. Wrap the LLM call in try/except to handle errors gracefully:
-       - Catch NotImplementedError and return 501
-       - Catch other exceptions and return 500 with a helpful detail message
-
-    Example error handling:
-        try:
-            analysis = await analyze_journal_entry(entry_id, entry_text)
-        except NotImplementedError:
-            raise HTTPException(status_code=501, detail="LLM analysis not yet implemented")
-        except Exception as e:
-            raise HTTPException(status_code=500, detail=f"Analysis failed: {str(e)}")
-    """
-    raise HTTPException(
-        status_code=501, detail="Implement this endpoint - see Learn to Cloud curriculum"
+    # Combine work, struggle, and intention into entry_text
+    # entry_text = ""
+    entry_text = (
+        f"Work: {result['work']}\nStruggle: {result['struggle']}\nIntention: {result['intention']}"
     )
+
+    try:  # Try block for LLM analysis
+        analysis = await analyze_journal_entry(entry_id, entry_text)
+        return analysis
+    except NotImplementedError:
+        raise HTTPException(status_code=501, detail="LLM analysis not yet implemented")
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Analysis failed: {str(e)}")

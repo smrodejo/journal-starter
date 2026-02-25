@@ -57,7 +57,6 @@ async def get_entry(entry_id: str, entry_service: EntryService = Depends(get_ent
 async def update_entry(
     entry_id: str, entry_update: dict, entry_service: EntryService = Depends(get_entry_service)
 ):
-    """Update a journal entry"""
     result = await entry_service.update_entry(entry_id, entry_update)
     if not result:
         raise HTTPException(status_code=404, detail="Entry not found")
@@ -77,7 +76,6 @@ async def delete_entry(entry_id: str, entry_service: EntryService = Depends(get_
 
 @router.delete("/entries")
 async def delete_all_entries(entry_service: EntryService = Depends(get_entry_service)):
-    """Delete all journal entries"""
     await entry_service.delete_all_entries()
     return {"detail": "All entries deleted"}
 
@@ -95,7 +93,7 @@ async def analyze_entry(entry_id: str, entry_service: EntryService = Depends(get
         f"Work: {result['work']}\nStruggle: {result['struggle']}\nIntention: {result['intention']}"
     )
 
-    try:
+    try:  # Try block for LLM analysis
         analysis = await analyze_journal_entry(entry_id, entry_text)
         return analysis
     except NotImplementedError:

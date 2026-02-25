@@ -46,5 +46,5 @@ async def analyze_journal_entry(entry_id: str, entry_text: str) -> dict:
         analysis_result = response.choices[0].message.content
         result = json.loads(analysis_result)
         return result
-    except Exception as e:
+    except Exception as e:  # Status code 500 for any LLM-related errors
         raise HTTPException(status_code=500, detail=f"LLM error: {str(e)}")

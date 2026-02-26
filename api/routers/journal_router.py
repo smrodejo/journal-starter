@@ -44,8 +44,6 @@ async def get_all_entries(entry_service: EntryService = Depends(get_entry_servic
 
 @router.get("/entries/{entry_id}")
 async def get_entry(entry_id: str, entry_service: EntryService = Depends(get_entry_service)):
-    # Get single entry by ID
-    # Checking if entry_service is not empty
     result = await entry_service.get_entry(entry_id)
     if not result:
         raise HTTPException(status_code=404, detail="Entry not found")
@@ -86,9 +84,7 @@ async def analyze_entry(entry_id: str, entry_service: EntryService = Depends(get
     result = await entry_service.get_entry(entry_id)
     if not result:
         raise HTTPException(status_code=404, detail="Entry not found")
-
-    # Combine work, struggle, and intention into entry_text
-    # entry_text = ""
+        
     entry_text = (
         f"Work: {result['work']}\nStruggle: {result['struggle']}\nIntention: {result['intention']}"
     )
@@ -96,7 +92,5 @@ async def analyze_entry(entry_id: str, entry_service: EntryService = Depends(get
     try:  # LLM analysis
         analysis = await analyze_journal_entry(entry_id, entry_text)
         return analysis
-    except NotImplementedError:
-        raise HTTPException(status_code=501, detail="LLM analysis not yet implemented")
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Analysis failed: {str(e)}")

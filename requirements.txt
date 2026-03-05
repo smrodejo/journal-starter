@@ -1,0 +1,11 @@
+fastapi
+uvicorn
+python-dotenv
+aiohttp
+sqlalchemy
+psycopg2-binary
+asyncpg
+pytest>=9.0.2
+openai>=2.24.0
+pytest-asyncio
+httpx

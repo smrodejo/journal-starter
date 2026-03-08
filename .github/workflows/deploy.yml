@@ -1,12 +1,13 @@
 name: Deploy
 
 on:
+  push:
+    branches: [main]
   workflow_run:
     workflows: ["Build and Push"]
     types:
       - completed
-    branches:
-      - main
+  workflow_dispatch:
 
 jobs:
   deploy:

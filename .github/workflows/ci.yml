@@ -2,9 +2,10 @@ name: Test CI
 
 on:
   push:
-    branches: [ main ]
+    branches: [main]
   pull_request:
-    branches: [ main ]
+    branches: [main]
+  workflow_dispatch:
 
 env:
   PROJECT_ID: ${{ secrets.GCP_PROJECT_ID }}
@@ -35,7 +36,7 @@ jobs:
 
     steps:
       - uses: actions/checkout@v4
-      
+
       - name: Install uv
         uses: astral-sh/setup-uv@v5
         with:
@@ -59,5 +60,3 @@ jobs:
         run: uv run pytest
         env:
           DATABASE_URL: postgresql://user:password@localhost:5432/journal_test
-
-  

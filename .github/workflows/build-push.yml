@@ -1,12 +1,13 @@
 name: Build and Push
 
 on:
+  push:
+    branches: [main]
   workflow_run:
     workflows: ["Test CI"]
     types:
       - completed
-    branches:
-      - main
+  workflow_dispatch:
 
 jobs:
   build:

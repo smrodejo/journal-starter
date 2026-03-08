@@ -3,8 +3,10 @@ name: Deploy
 on:
   workflow_run:
     workflows: ["Build and Push"]
-    types: [completed]
-    branches: [main]
+    types:
+      - completed
+    branches:
+      - main
 
 jobs:
   deploy:

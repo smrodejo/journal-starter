@@ -2,9 +2,11 @@ name: Build and Push
 
 on:
   workflow_run:
-    workflows: ["Test"]
-    types: [completed]
-    branches: [main]
+    workflows: ["Test CI"]
+    types:
+      - completed
+    branches:
+      - main
 
 jobs:
   build:
@@ -38,5 +40,3 @@ jobs:
           docker build -t "$TAG:${{ github.sha }}" -t "$TAG:latest" .
           docker push "$TAG:${{ github.sha }}"
           docker push "$TAG:latest"
-
-  

@@ -110,3 +110,12 @@ resource "google_container_cluster" "primary" {
         channel = "REGULAR"
     }
 }
+
+# --- ARTIFACT REGISTRY ---
+
+resource "google_artifact_registry_repository" "journal_repo" {
+  location      = "us-central1"
+  repository_id = "journal-repo"
+  description   = "Docker repository for Journal API"
+  format        = "DOCKER"
+}

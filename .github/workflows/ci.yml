@@ -1,34 +1,41 @@
-name: test
+name: Test
 
 on:
   push:
-    branches: [main]
+    branches: [ main ]
   pull_request:
-    branches: [main]
+    branches: [ main ]
+
+env:
+  PROJECT_ID: ${{ secrets.GCP_PROJECT_ID }}
+  GAR_LOCATION: us-central1
+  REPOSITORY: journal-repo
+  IMAGE: journal-api
+  GKE_CLUSTER: journal-cluster
+  GKE_ZONE: us-central1
 
 jobs:
-  build-and-test:
+  test:
+    name: Test
     runs-on: ubuntu-latest
-
     services:
       postgres:
         image: postgres:15
         env:
-          POSTGRES_DB: journal_test
           POSTGRES_USER: user
           POSTGRES_PASSWORD: password
+          POSTGRES_DB: journal_test
         ports:
           - 5432:5432
-
         options: >-
           --health-cmd "pg_isready -U user -d journal_test"
           --health-interval 10s
-          --health-timeout 5s 
+          --health-timeout 5s
           --health-retries 5
 
     steps:
       - uses: actions/checkout@v4
-
+      
       - name: Install uv
         uses: astral-sh/setup-uv@v5
         with:
@@ -41,13 +48,16 @@ jobs:
         env:
           PGPASSWORD: password
         run: |
+          # Wait for postgres to be ready
           sleep 5
           psql -h localhost -U user -d journal_test -f database_setup.sql
-          
+
       - name: Install dependencies
-        run: uv sync --frozen --no-install-project
+        run: uv sync --frozen --all-extras --dev
 
       - name: Run tests
+        run: uv run pytest
         env:
           DATABASE_URL: postgresql://user:password@localhost:5432/journal_test
-        run: uv run pytest
+
+  

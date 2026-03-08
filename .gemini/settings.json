@@ -1,0 +1,16 @@
+{
+  "mcpServers": {
+    "github": {
+      "httpUrl": "https://api.githubcopilot.com/mcp/",
+      "headers": {
+        "Authorization": "Bearer $GITHUB_MCP_PAT"
+      }
+    },
+    "google-cloud-observability": {
+      "command": "npx",
+      "args": ["@google-cloud/observability-mcp@0.2.3"],
+      "env": {},
+      "type": "stdio"
+    }
+  }
+}
